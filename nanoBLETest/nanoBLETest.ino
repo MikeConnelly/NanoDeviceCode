@@ -97,7 +97,7 @@ void loop() {
         IMU.readAcceleration(accX, accY, accZ);
       }
       
-      measurementTime = millis();
+      measurementTime = millis() * 0.001;
       dMeasurementTime = measurementTime - prevMeasurementTime;
 
       accX = (accX*9.8) + accOffsetX;
