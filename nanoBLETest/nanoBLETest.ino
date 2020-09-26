@@ -17,6 +17,12 @@ BLEFloatCharacteristic posZChar("2A18", BLERead | BLENotify);
 float accOffsetX;
 float accOffsetY;
 float accOffsetZ;
+float prevAccX;
+float prevAccY;
+float prevAccZ;
+float prevVelX;
+float prevVelY;
+float prevVelZ;
 float velX;
 float velY;
 float velZ;
@@ -28,7 +34,6 @@ bool first;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
 
   pinMode(LED_BUILTIN, OUTPUT);
 
@@ -44,6 +49,12 @@ void setup() {
   accOffsetX = 0;
   accOffsetY = 9.8;
   accOffsetZ = 0;
+  prevAccX = 0;
+  prevAccY = 0;
+  prevAccZ = 0;
+  prevVelX = 0;
+  prevVelY = 0;
+  prevVelZ = 0;
   velX = 0;
   velY = 0;
   velZ = 0;
@@ -82,7 +93,8 @@ void setup() {
 void loop() {
   BLEDevice central = BLE.central();
   float accX, accY, accZ, measurementTime, dMeasurementTime;
-  float dvX, dvY, dvZ, dpX, dpY, dpZ = 0;
+  // float dvX, dvY, dvZ, dpX, dpY, dpZ = 0;
+  float avgAccX, avgAccY, avgAccZ, avgVelX, avgVelY, avgVelZ = 0;
   // float accsX[20], accsY[20], accsZ[20];
 
   if (central) {
@@ -103,24 +115,40 @@ void loop() {
       accX = (accX*9.8) + accOffsetX;
       accY = (accY*9.8) + accOffsetY;
       accZ = (accZ*9.8) + accOffsetZ;
+      
+      Serial.println(accX);
 
+      avgAccX = (accX + prevAccX) / 2;
+      avgAccY = (accY + prevAccY) / 2;
+      avgAccZ = (accZ + prevAccZ) / 2;
+      /*
       dvX = accX * dMeasurementTime;
       dvY = accY * dMeasurementTime;
       dvZ = accZ * dMeasurementTime;
-
-      velX = velX + dvX;
-      velY = velY + dvY;
-      velZ = velZ + dvZ;
-
+      */
+      velX = prevVelX + (avgAccX * dMeasurementTime);
+      velY = prevVelY + (avgAccY * dMeasurementTime);
+      velZ = prevVelZ + (avgAccZ * dMeasurementTime);
+/*
       dpX = velX * dMeasurementTime;
       dpY = velY * dMeasurementTime;
       dpZ = velZ * dMeasurementTime;
-
-      posX = posX + dpX;
-      posY = posY + dpY;
-      posZ = posZ + dpZ;
+*/
+      avgVelX = (velX + prevVelX) / 2;
+      avgVelY = (velY + prevVelY) / 2;
+      avgVelZ = (velZ + prevVelZ) / 2;
+      
+      posX = posX + (avgVelX * dMeasurementTime);
+      posY = posY + (avgVelY * dMeasurementTime);
+      posZ = posZ + (avgVelZ * dMeasurementTime);
 
       prevMeasurementTime = measurementTime;
+      prevAccX = accX;
+      prevAccY = accY;
+      prevAccZ = accZ;
+      prevVelX = velX;
+      prevVelY = velY;
+      prevVelZ = velZ;
 
       accXChar.writeValue(accX);
       accYChar.writeValue(accY);
@@ -133,6 +161,7 @@ void loop() {
       posXChar.writeValue(posX);
       posYChar.writeValue(posY);
       posZChar.writeValue(posZ);
+      
     }
 
     digitalWrite(LED_BUILTIN, LOW);
