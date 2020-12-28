@@ -13,7 +13,7 @@ BLEFloatCharacteristic velZChar("2A15", BLERead | BLENotify);
 BLEFloatCharacteristic posXChar("2A16", BLERead | BLENotify);
 BLEFloatCharacteristic posYChar("2A17", BLERead | BLENotify);
 BLEFloatCharacteristic posZChar("2A18", BLERead | BLENotify);
-
+ 
 float accOffsetX;
 float accOffsetY;
 float accOffsetZ;
@@ -65,9 +65,6 @@ void setup() {
   first = true;
 
   BLE.setLocalName("Nano33BLE");
-  //BLE.setAdvertisedService(greetingService);
-  //greetingService.addCharacteristic(greetingCharacteristic);
-  //BLE.addService(greetingService);
   BLE.setAdvertisedService(accelerationService);
   BLE.setAdvertisedService(velocityService);
   BLE.setAdvertisedService(positionService);
@@ -93,9 +90,7 @@ void setup() {
 void loop() {
   BLEDevice central = BLE.central();
   float accX, accY, accZ, measurementTime, dMeasurementTime;
-  // float dvX, dvY, dvZ, dpX, dpY, dpZ = 0;
   float avgAccX, avgAccY, avgAccZ, avgVelX, avgVelY, avgVelZ = 0;
-  // float accsX[20], accsY[20], accsZ[20];
 
   if (central) {
     if (first) { delay(500); }
@@ -115,25 +110,26 @@ void loop() {
       accX = (accX*9.8) + accOffsetX;
       accY = (accY*9.8) + accOffsetY;
       accZ = (accZ*9.8) + accOffsetZ;
-      
-      Serial.println(accX);
 
+      
+      if (accX < 0.3 && accX > -0.3) {
+        accX = 0.0; 
+      }
+      if (accY < 0.3 && accY > -0.3) {
+        accY = 0.0;
+      }
+      if (accZ < 0.3 && accZ > -0.3) {
+        accZ = 0.0;
+      }
+      
       avgAccX = (accX + prevAccX) / 2;
       avgAccY = (accY + prevAccY) / 2;
       avgAccZ = (accZ + prevAccZ) / 2;
-      /*
-      dvX = accX * dMeasurementTime;
-      dvY = accY * dMeasurementTime;
-      dvZ = accZ * dMeasurementTime;
-      */
+      
       velX = prevVelX + (avgAccX * dMeasurementTime);
       velY = prevVelY + (avgAccY * dMeasurementTime);
       velZ = prevVelZ + (avgAccZ * dMeasurementTime);
-/*
-      dpX = velX * dMeasurementTime;
-      dpY = velY * dMeasurementTime;
-      dpZ = velZ * dMeasurementTime;
-*/
+      
       avgVelX = (velX + prevVelX) / 2;
       avgVelY = (velY + prevVelY) / 2;
       avgVelZ = (velZ + prevVelZ) / 2;
@@ -161,7 +157,12 @@ void loop() {
       posXChar.writeValue(posX);
       posYChar.writeValue(posY);
       posZChar.writeValue(posZ);
-      
+
+      Serial.println("------------------");
+      Serial.println(posX);
+      Serial.println(posY);
+      Serial.println(posZ);
+      Serial.println("------------------");
     }
 
     digitalWrite(LED_BUILTIN, LOW);
