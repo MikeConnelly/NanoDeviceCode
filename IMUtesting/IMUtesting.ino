@@ -1,6 +1,5 @@
 // Madgwick - Version: Latest 
 #include <MadgwickAHRS.h>
-// Arduino_LSM6DS3 - Version: Latest 
 #include <Arduino_LSM9DS1.h>
 
 #include "thingProperties.h"

@@ -17,6 +17,8 @@ void loop() {
   }
 }
 
+// resource on the cell module: https://lastminuteengineers.com/sim800l-gsm-module-arduino-tutorial/
+
 // AT
 // AT+CFUN?
 // AT+SAPBR=3,1,"Contype","GBRS"
